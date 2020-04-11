@@ -1,0 +1,72 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+name: Assembly 6502 (WLA)
+file_extensions:
+  - asm
+scope: source.asm
+
+variables:
+  directives: (:?EMPTYFILL|EXPORT|OUTNAME|16BIT|8BIT|ASC|ASCTABLE|ASCIITABLE|ASM|BACKGROUND|BANK +[0-9]+ +SLOT +[0-9]+|BASE|BLOCK|BR|BREAKPOINT|BYT|DATA|DB|DBM|DBCOS|DBRND|DBSIN|DEFINE|DEF|DS|DSB|DSTRUCT|DSW|DW|DWM|DWCOS|DWRND|DWSIN|ELSE|ENDA|ENDASM|ENDB|ENDE|ENDIF|ENDM|ENDME|ENDR|ENDRO|ENDS|ENDST|ENUM|ENUMID|EQU|FAIL|FCLOSE|FOPEN|FREAD|FSIZE|IF|IFDEF|IFDEFM|IFEQ|IFEXISTS|IFGR|IFGREQ|IFLE|IFLEEQ|IFNDEF|IFNDEFM|IFNEQ|INCBIN|INCDIR|INCLUDE|INPUT|MACRO|MEMORYMAP|ORG|ORGA|PRINT|PRINTT|PRINTV|RAMSECTION|REDEFINE|REDEF|REPEAT|REPT|ROMBANKMAP|ROMBANKS|ROMBANKSIZE|ROW|SEED|SECTION|SHIFT|SLOT +[0-9]+|STRUCT|SYM|SYMBOL|TABLE|UNBACKGROUND|UNDEFINE|UNDEF|WORD|ADDR|b|B|w|W)
+  instructions: (:?adc|ADC|and|AND|asl|ASL|bcc|BCC|bcs|BCS|beq|BEQ|bit|BIT|bmi|BMI|bne|BNE|bpl|BPL|brk|BRK|bvc|BVC|bvs|BVS|clc|CLC|cld|CLD|cli|CLI|clv|CLV||cmp|CMP|cpx|CPX|cpy|CPY|dec|DEC|dex|DEX|dey|DEY|eor|EOR|inc|INC|inx|INX|iny|INY|jmp|JMP|jsr|JSR|lda|LDA|ldx|LDX|ldy|LDY|lsr|LSR|nop|NOP|ora|ORA|pha|PHA|php|PHP|pla|PLA|plp|PLP|rol|ROL|ror|ROR|rti|RTI|rts|RTS|sbc|SBC|sec|SEC|sed|SED|sei|SEI|sta|STA|stx|STX|sty|STY|tax|TAX|tay|TAY|tsx|TSX|txa|TXA|txs|TXS|tya|TYA)
+
+contexts:
+  main:
+    # Strings begin and end with quotes, and use backslashes as an escape
+    # character
+    - match: '"'
+      scope: punctuation.definition.string.begin.asm
+      push: double_quoted_string
+
+    # Comments begin with a ';' or * at start of line and finish at the end of the line
+    - match: ;|^\*
+      scope: punctuation.definition.comment.asm
+      push: line_comment
+
+    # Block comments begin with /*
+    - match: \/\*
+      scope: punctuation.definition.comment.asm
+      push: block_comment
+
+    # Keywords are 6052 instructions
+    # Note that blackslashes don't need to be escaped within single quoted
+    # strings in YAML. When using single quoted strings, only single quotes
+    # need to be escaped: this is done by using two single quotes next to each
+    # other.
+    - match: '\b{{instructions}}\b'
+      scope: keyword.control.asm
+
+    # Assembler Directives
+    - match: \.{{directives}}\b
+      scope: entity.name.function.asm
+
+    # Numbers
+    - match: '\s(\#)?(-)?[0-9]+\b'
+      scope: constant.numeric.integer.decimal.asm
+
+    - match: '\s(\#)?((\$[0-9a-fA-F]+)|([0-9a-fA-F]+h))\b'
+      scope: constant.numeric.integer.hexadecimal.asm
+
+    - match: '\s(\#)?\%[0-1]+\b'
+      scope: constant.numeric.integer.binary.asm
+
+    - match: \s(\#)?'\w'\s
+      scope: constant.numeric.integer.other.asm
+
+  double_quoted_string:
+    - meta_scope: string.quoted.double.asm
+    - match: '\\.'
+      scope: constant.character.escape.asm
+    - match: '"'
+      scope: punctuation.definition.string.end.asm
+      pop: true
+
+  line_comment:
+    - meta_scope: comment.line.asm
+    - match: $
+      pop: true
+
+  block_comment:
+    - meta_scope: comment.block.asm
+    - match: \*\/
+      pop: true
